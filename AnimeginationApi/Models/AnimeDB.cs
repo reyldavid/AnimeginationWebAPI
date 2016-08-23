@@ -4,12 +4,20 @@ namespace AnimeginationApi.Models
     using System.Data.Entity;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
+    using Microsoft.AspNet.Identity.EntityFramework;
 
-    public partial class AnimeDB : DbContext
+    public partial class AnimeDB : IdentityDbContext<ApplicationUser> // DbContext
     {
         public AnimeDB()
-            : base("name=AnimeDB")
+            : base("name=AnimeDB", throwIfV1Schema: false)
         {
+            Configuration.ProxyCreationEnabled = false;
+            Configuration.LazyLoadingEnabled = false;
+        }
+
+        public static AnimeDB Create()
+        {
+            return new AnimeDB();
         }
 
         public virtual DbSet<Category> Categories { get; set; }
@@ -29,6 +37,8 @@ namespace AnimeginationApi.Models
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<UserProfile>()
                 .HasOptional(e => e.UserInfo)
                 .WithRequired(e => e.UserProfile);
