@@ -46,6 +46,10 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="jose-jwt, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\jose-jwt.2.0.1\lib\net40\jose-jwt.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
       <Private>True</Private>
@@ -180,10 +184,16 @@
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\SimilarsController.cs" />
     <Compile Include="Controllers\StatesController.cs" />
+    <Compile Include="Controllers\UserAccountsController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Filters\AdminRoleFilter.cs" />
+    <Compile Include="Filters\JwtTokenFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Handlers\AdminRoleHandler.cs" />
+    <Compile Include="Handlers\ApiKeyHandler.cs" />
+    <Compile Include="Handlers\JwtTokenHandler.cs" />
     <Compile Include="Migrations\201608041528240_initial.cs" />
     <Compile Include="Migrations\201608041528240_initial.Designer.cs">
       <DependentUpon>201608041528240_initial.cs</DependentUpon>
@@ -192,8 +202,11 @@
     <Compile Include="Models\AccountModel.cs" />
     <Compile Include="Models\AnimeDB.cs" />
     <Compile Include="Models\ApiProduct.cs" />
+    <Compile Include="Models\ApiUserAccount.cs" />
+    <Compile Include="Models\AspnetUser.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\ChangePasswordModel.cs" />
+    <Compile Include="Models\ClaimModel.cs" />
     <Compile Include="Models\IdentityModel.cs" />
     <Compile Include="Models\Listing.cs" />
     <Compile Include="Models\ListType.cs" />
@@ -205,6 +218,8 @@
     <Compile Include="Models\Publisher.cs" />
     <Compile Include="Models\Rating.cs" />
     <Compile Include="Models\State.cs" />
+    <Compile Include="Models\TokenModel.cs" />
+    <Compile Include="Models\UserAccount.cs" />
     <Compile Include="Models\UserFeedback.cs" />
     <Compile Include="Models\UserInfo.cs" />
     <Compile Include="Models\UserNote.cs" />
@@ -212,6 +227,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\CustomOAuthProvider.cs" />
     <Compile Include="Services\Extensions.cs" />
+    <Compile Include="Services\Helpers.cs" />
+    <Compile Include="Services\RequestManager.cs" />
+    <Compile Include="Services\RolesManager.cs" />
+    <Compile Include="Services\TokenManager.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>

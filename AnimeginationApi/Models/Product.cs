@@ -34,7 +34,7 @@ namespace AnimeginationApi.Models
 
         public double YourPrice { get; set; }
 
-        public int CategoryID { get; set; }
+        public virtual int CategoryID { get; set; }
 
         [StringLength(20)]
         public string ProductAgeRating { get; set; }
@@ -43,9 +43,9 @@ namespace AnimeginationApi.Models
 
         public int? ProductYearCreated { get; set; }
 
-        public int? MediumID { get; set; }
-
-        public int PublisherID { get; set; }
+        public virtual int? MediumID { get; set; }
+        
+        public virtual int PublisherID { get; set; }
 
         public string ProductImageURL { get; set; }
 
@@ -53,16 +53,19 @@ namespace AnimeginationApi.Models
 
         public int RatingID { get; set; }
 
+        [ForeignKey("CategoryID")]
         public virtual Category Category { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Listing> Listings { get; set; }
 
+        [ForeignKey("MediumID")]
         public virtual Medium Medium { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderItem> OrderItems { get; set; }
 
+        [ForeignKey("PublisherID")]
         public virtual Publisher Publisher { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

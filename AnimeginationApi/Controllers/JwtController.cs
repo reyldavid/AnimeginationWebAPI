@@ -6,17 +6,14 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Security.Cryptography;
+using AnimeginationApi.Models;
+using Newtonsoft.Json;
+using AnimeginationApi.Services;
+using System.Dynamic;
 
 namespace AnimeginationApi.Controllers
 {
-    public class JwtKeys
-    {
-        public string InPublicKey;
-        public string InPrivateKey;
-        public string OutPublicKey;
-        public string OutPrivateKey;
-    }
-
+    [RoutePrefix("api/jwt")]
     public class JwtController : ApiController
     {
         // GET: api/Jwt
@@ -30,7 +27,7 @@ namespace AnimeginationApi.Controllers
             string outPublicKey = string.Empty;
             string outPrivateKey = string.Empty;
 
-            RSACryptoServiceProvider inKey = new RSACryptoServiceProvider();            
+            RSACryptoServiceProvider inKey = new RSACryptoServiceProvider();
             inPublicKey = inKey.ToXmlString(false);
             inPrivateKey = inKey.ToXmlString(true);
 
@@ -48,7 +45,8 @@ namespace AnimeginationApi.Controllers
             outPublicKey = Convert.ToBase64String(outPublicBytes, 0, outPublicBytes.Length);
             outPrivateKey = Convert.ToBase64String(outPrivateBytes, 0, outPrivateBytes.Length);
 
-            var keys = new JwtKeys() {
+            var keys = new JwtKeys()
+            {
                 InPublicKey = inPublicKey,
                 InPrivateKey = inPrivateKey,
                 OutPublicKey = outPublicKey,
@@ -56,6 +54,43 @@ namespace AnimeginationApi.Controllers
             };
 
             return keys;
+        }
+
+        [HttpPost]
+        [Route("GetClaim")]
+        // GET: api/Jwt
+        [SwaggerOperation("GetClaim")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.Unauthorized)]
+        public HttpResponseMessage GetClaim([FromBody]TokenModel token)
+        {
+            dynamic data = new ExpandoObject();
+
+            ClaimModel claim = TokenManager.CreateClaim(token);
+
+            data.UserId = claim.UserId;
+            data.UserName = claim.UserName;
+            data.Email = claim.Email;
+            data.Roles = claim.Roles;
+            
+            HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK, (object)data);
+            return response;
+        }
+
+        [HttpPost]
+        [Route("GetToken")]
+        [SwaggerOperation("GetToken")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.Unauthorized)]
+        public HttpResponseMessage GetToken ([FromBody]ClaimModel claim)
+        {
+            dynamic data = new ExpandoObject();
+
+            var encryptedToken = TokenManager.CreateToken(claim);
+            data.Token = encryptedToken;
+
+            HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK, (object)data);
+            return response;
         }
     }
 }

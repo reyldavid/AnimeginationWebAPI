@@ -15,12 +15,25 @@ namespace AnimeginationApi.Controllers
     {
         private ModelFactory _modelFactory;
         private ApplicationUserManager _AppUserManager = null;
+        private ApplicationSignInManager _AppSignInManager = null;
 
         protected ApplicationUserManager AppUserManager
         {
             get
             {
                 return _AppUserManager ?? Request.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+        }
+
+        protected ApplicationSignInManager AppSignInManager
+        {
+            get
+            {
+                return _AppSignInManager ?? Request.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            set
+            {
+                _AppSignInManager = value;
             }
         }
 

@@ -8,6 +8,7 @@ using Swashbuckle.Swagger.Annotations;
 using System.Net.Http;
 using System.Web;
 using AnimeginationApi.Services;
+using AnimeginationApi.Filters;
 
 namespace AnimeginationApi.Controllers
 {
@@ -47,8 +48,11 @@ namespace AnimeginationApi.Controllers
         [SwaggerOperation("GetProducts")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
+        //[JwtTokenFilter]
         public object GetProducts(int id)
         {
+            //string username = Request.UserName();
+
             var product =
             db.Products.Select(prod => new
             {
@@ -122,27 +126,32 @@ namespace AnimeginationApi.Controllers
         //    return CreatedAtRoute("DefaultApi", new { id = product.ProductID }, product);
         //}
 
+        [SwaggerOperation("PostProduct")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.RequestTimeout)]
+        [SwaggerResponse(HttpStatusCode.ServiceUnavailable)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
         public HttpResponseMessage PostProduct([FromBody] ApiProduct apiProduct)
         {
             HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Unauthorized);
 
-            string apiKey = string.Empty;
-            HttpRequestMessage httpRequest = HttpContext.Current.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
+            //string apiKey = string.Empty;
+            //HttpRequestMessage httpRequest = HttpContext.Current.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
 
-            if (httpRequest.Headers.Contains("ApiKey"))
-            {
-                IEnumerable<string> apiKeys = httpRequest.Headers.GetValues("ApiKey");
+            //if (httpRequest.Headers.Contains("ApiKey"))
+            //{
+            //    IEnumerable<string> apiKeys = httpRequest.Headers.GetValues("ApiKey");
 
-                if (apiKeys != null)
-                {
-                    string[] apiValues = apiKeys.ToArray<string>();
-                    if (apiValues.Length > 0)
-                    {
-                        apiKey = apiValues[0];
-                        if (!string.IsNullOrEmpty(apiKey))
-                        {
-                            if (apiKey.Equals("AnimeApiClientKey".GetConfigurationValue()))
-                            {
+            //    if (apiKeys != null)
+            //    {
+            //        string[] apiValues = apiKeys.ToArray<string>();
+            //        if (apiValues.Length > 0)
+            //        {
+            //            apiKey = apiValues[0];
+            //            if (!string.IsNullOrEmpty(apiKey))
+            //            {
+            //                if (apiKey.Equals("AnimeApiClientKey".GetConfigurationValue()))
+            //                {
                                 response = Request.CreateResponse(HttpStatusCode.OK);
 
                                 Product product = new Product
@@ -165,11 +174,11 @@ namespace AnimeginationApi.Controllers
 
                                 db.Products.Add(product);
                                 db.SaveChanges();
-                            }
-                        }
-                    }
-                }
-            }
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
             return response;
         }
 

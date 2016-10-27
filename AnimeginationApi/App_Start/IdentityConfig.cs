@@ -13,6 +13,8 @@ using System.Web.Script.Serialization;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using AnimeginationApi.Services;
+using Microsoft.Owin.Security;
+using System.Security.Claims;
 
 namespace AnimeginationApi.App_Start
 {
@@ -135,6 +137,25 @@ namespace AnimeginationApi.App_Start
                 };
             }
             return manager;
+        }
+    }
+
+    // Configure the application sign-in manager which is used in this application.
+    public class ApplicationSignInManager : SignInManager<ApplicationUser, string>
+    {
+        public ApplicationSignInManager(ApplicationUserManager userManager, IAuthenticationManager authenticationManager)
+            : base(userManager, authenticationManager)
+        {
+        }
+
+        public override Task<ClaimsIdentity> CreateUserIdentityAsync(ApplicationUser user)
+        {
+            return user.GenerateUserIdentityAsync((ApplicationUserManager)UserManager, DefaultAuthenticationTypes.ApplicationCookie);
+        }
+
+        public static ApplicationSignInManager Create(IdentityFactoryOptions<ApplicationSignInManager> options, IOwinContext context)
+        {
+            return new ApplicationSignInManager(context.GetUserManager<ApplicationUserManager>(), context.Authentication);
         }
     }
 

@@ -9,10 +9,10 @@ namespace AnimeginationApi.Models
     public partial class AnimeDB : IdentityDbContext<ApplicationUser> // DbContext
     {
         public AnimeDB()
-            : base("name=AnimeDB", throwIfV1Schema: false)
+            : base("name=AnimeDB") //, throwIfV1Schema: false)
         {
-            Configuration.ProxyCreationEnabled = false;
-            Configuration.LazyLoadingEnabled = false;
+            //Configuration.ProxyCreationEnabled = false;
+            //Configuration.LazyLoadingEnabled = false;
         }
 
         public static AnimeDB Create()
@@ -34,6 +34,8 @@ namespace AnimeginationApi.Models
         public virtual DbSet<UserInfo> UserInfoes { get; set; }
         public virtual DbSet<UserNote> UserNotes { get; set; }
         public virtual DbSet<UserProfile> UserProfiles { get; set; }
+        public virtual DbSet<UserAccount> UserAccounts { get; set; }
+        public virtual DbSet<AspnetUser> AspnetUsers { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
