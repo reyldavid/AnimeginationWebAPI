@@ -247,7 +247,7 @@ namespace AnimeginationApi.Controllers
         [SwaggerResponse(HttpStatusCode.Forbidden)]
         public async Task<IHttpActionResult> DeleteUserAccount(string id)
         {
-            // Delete User Account Recod
+            // Delete User Account Record
             UserAccount userAccount = await db.UserAccounts.FindAsync(id);
             // UserAccount userAccount2 = db.UserAccounts.Where(ua => ua.UserId == id).FirstOrDefault();
 

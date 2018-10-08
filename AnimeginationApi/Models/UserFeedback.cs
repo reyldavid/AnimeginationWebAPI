@@ -27,6 +27,6 @@ namespace AnimeginationApi.Models
 
         public virtual Product Product { get; set; }
 
-        public virtual UserProfile UserProfile { get; set; }
+        //public virtual UserProfile UserProfile { get; set; }
     }
 }

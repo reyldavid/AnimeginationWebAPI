@@ -11,7 +11,7 @@ namespace AnimeginationApi.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public State()
         {
-            UserInfoes = new HashSet<UserInfo>();
+            //UserInfoes = new HashSet<UserInfo>();
         }
 
         public int StateID { get; set; }
@@ -23,7 +23,7 @@ namespace AnimeginationApi.Models
         [StringLength(100)]
         public string StateName { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserInfo> UserInfoes { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<UserInfo> UserInfoes { get; set; }
     }
 }

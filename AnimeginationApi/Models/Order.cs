@@ -16,7 +16,7 @@ namespace AnimeginationApi.Models
 
         public int OrderID { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public double ShippingHandling { get; set; }
 
@@ -24,15 +24,19 @@ namespace AnimeginationApi.Models
 
         public double Discounts { get; set; }
 
+        public double Totals { get; set; }
+
         public DateTime OrderDate { get; set; }
 
         public bool IsPurchased { get; set; }
 
         public string TrackingNumber { get; set; }
 
+        public int OrderTypeID { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderItem> OrderItems { get; set; }
 
-        public virtual UserProfile UserProfile { get; set; }
+        public virtual OrderType OrderType { get; set; }
     }
 }

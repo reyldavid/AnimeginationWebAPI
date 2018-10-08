@@ -172,12 +172,15 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountsController.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
+    <Compile Include="Controllers\CartItemsController.cs" />
     <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\CategoryListController.cs" />
     <Compile Include="Controllers\JwtController.cs" />
     <Compile Include="Controllers\ListingsController.cs" />
     <Compile Include="Controllers\ListTypesController.cs" />
     <Compile Include="Controllers\MediaController.cs" />
+    <Compile Include="Controllers\OrderItemsController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PublishersController.cs" />
     <Compile Include="Controllers\RatingsController.cs" />
@@ -214,6 +217,9 @@
     <Compile Include="Models\ModelFactory.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\OrderItem.cs" />
+    <Compile Include="Models\OrderItemModel.cs" />
+    <Compile Include="Models\OrderModel.cs" />
+    <Compile Include="Models\OrderType.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\Publisher.cs" />
     <Compile Include="Models\Rating.cs" />

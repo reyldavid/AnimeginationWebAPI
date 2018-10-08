@@ -12,9 +12,9 @@ namespace AnimeginationApi.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public UserProfile()
         {
-            Orders = new HashSet<Order>();
-            UserFeedbacks = new HashSet<UserFeedback>();
-            UserNotes = new HashSet<UserNote>();
+            //Orders = new HashSet<Order>();
+            //UserFeedbacks = new HashSet<UserFeedback>();
+            //UserNotes = new HashSet<UserNote>();
         }
 
         [Key]

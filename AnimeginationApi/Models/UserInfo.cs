@@ -51,6 +51,6 @@ namespace AnimeginationApi.Models
 
         public virtual State State { get; set; }
 
-        public virtual UserProfile UserProfile { get; set; }
+        //public virtual UserProfile UserProfile { get; set; }
     }
 }

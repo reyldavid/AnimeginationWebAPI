@@ -20,6 +20,6 @@ namespace AnimeginationApi.Models
 
         public DateTime Created { get; set; }
 
-        public virtual UserProfile UserProfile { get; set; }
+        //public virtual UserProfile UserProfile { get; set; }
     }
 }
