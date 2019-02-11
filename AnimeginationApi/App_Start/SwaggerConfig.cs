@@ -6,6 +6,8 @@ using Swashbuckle.Application;
 using Swashbuckle.Swagger;
 using WebActivatorEx;
 using AnimeginationApi;
+using System;
+using System.Collections.Generic;
 
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
@@ -168,6 +170,9 @@ namespace AnimeginationApi
                         //c.OperationFilter<IncludeParameterNamesInOperationIdFilter>();
                         //
 
+                        c.OperationFilter<HeaderClientKeyFilter>();
+                        c.OperationFilter<HeaderUserTokenFilter>();
+
                         // Post-modify the entire Swagger document by wiring up one or more Document filters.
                         // This gives full control to modify the final SwaggerDocument. You should have a good understanding of
                         // the Swagger 2.0 spec. - https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md
@@ -240,6 +245,42 @@ namespace AnimeginationApi
                         //
                         //c.EnableOAuth2Support("test-client-id", "test-realm", "Swagger UI");
                     });
+        }
+    }
+
+    internal class HeaderClientKeyFilter : IOperationFilter
+    {
+        public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
+        {
+            if (operation.parameters == null)
+                operation.parameters = new List<Parameter>();
+
+            operation.parameters.Add(new Parameter
+            {
+                name = "AnimeApiClientKey",
+                @in = "header",
+                type = "string",
+                description = "Animegination API Client Key",
+                required = false
+            });
+        }
+    }
+
+    internal class HeaderUserTokenFilter : IOperationFilter
+    {
+        public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
+        {
+            if (operation.parameters == null)
+                operation.parameters = new List<Parameter>();
+
+            operation.parameters.Add(new Parameter
+            {
+                name = "JWTToken",
+                @in = "header",
+                type = "string",
+                description = "User Token",
+                required = false
+            });
         }
     }
 
