@@ -43,6 +43,14 @@ namespace AnimeginationApi.Filters
                             base.OnActionExecuting(actionContext);
                             return;
                         }
+
+                        string[] adminUsersArray = "AdminUserNames".GetConfigurationValue().Split(',');
+                        List<string> adminUsers = adminUsersArray.ToList();
+                        if (adminUsers.Contains(claim.UserName))
+                        {
+                            base.OnActionExecuting(actionContext);
+                            return;
+                        }
                     }
                     throw new HttpResponseException(actionContext.Request.CreateErrorResponse(
                         HttpStatusCode.Forbidden, "Admin operation is not allowed"));
