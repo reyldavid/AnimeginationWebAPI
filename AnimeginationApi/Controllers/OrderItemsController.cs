@@ -116,49 +116,92 @@ namespace AnimeginationApi.Controllers
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        public HttpResponseMessage PostOrder([FromBody] OrderModel orderInput)
+        public async Task<IHttpActionResult> PostOrderItem([FromBody] OrderItemModel orderItemInput)
         {
-            string userId = Request.UserId();
-
-            if (!userId.Equals(orderInput.userid))
+            if (string.IsNullOrEmpty(Request.UserId()))
             {
-                return Request.CreateResponse(HttpStatusCode.Unauthorized);
+                return Unauthorized();
             }
-            Order order = db.Orders.SingleOrDefault(ord => ord.OrderID == orderInput.orderid);
+
+            Order order = db.Orders.SingleOrDefault(ord => ord.OrderID == orderItemInput.orderid);
 
             if (order == null)
             {
-                return Request.CreateResponse(HttpStatusCode.NotFound);
+                return Unauthorized();
             }
 
-            OrderType orderType = db.OrderTypes.SingleOrDefault(
-                ordtype => ordtype.OrderName.ToLower().Equals(orderInput.ordertype.ToLower()));
-
-            double subTotal = order.OrderItems.Sum(item => item.Product.YourPrice * item.Quantity);
-
-            double shipping = Math.Round(Helpers.GetShippingAndHandling(subTotal, order.OrderItems.Sum(item => item.Quantity)), 2);
-            double taxes = Math.Round(Helpers.GetTaxes(subTotal), 2);
-            double discounts = Math.Round(Helpers.GetDiscounts(subTotal), 2);
-
-            order.ShippingHandling = orderInput.shipping == 0 ?
-                shipping : Double.Parse(orderInput.shipping.ToString());
-            order.Taxes = orderInput.taxes == 0 ?
-                taxes : Double.Parse(orderInput.taxes.ToString());
-            order.Discounts = orderInput.discounts == 0 ?
-                discounts : Double.Parse(orderInput.discounts.ToString());
-
-            order.TrackingNumber = string.IsNullOrEmpty(orderInput.trackingnumber) ?
-                Helpers.GetTrackingNumber() : orderInput.trackingnumber;
-            order.OrderDate = DateTime.Now;
-            order.IsPurchased = orderInput.ispurchased;
-
-            order.OrderTypeID = string.IsNullOrEmpty(orderInput.ordertype) ? 
-                order.OrderTypeID : orderType.OrderTypeID;
+            OrderItem orderItem = db.OrderItems.SingleOrDefault(item => item.OrderItemID == orderItemInput.orderitemid);
+            
+            if (orderItem == null)
+            {
+                return NotFound();
+            }
+            orderItem.ProductID = orderItemInput.productid;
+            orderItem.Quantity = orderItemInput.quantity;
+            orderItem.FinalUnitPrice = Double.Parse(orderItemInput.unitprice.ToString());
 
             db.SaveChanges();
 
-            return Request.CreateResponse(HttpStatusCode.OK, order);
+            var response = new
+            {
+                OrderItemID = orderItem.OrderItemID,
+                OrderID = orderItem.OrderItemID,
+                ProductID = orderItem.ProductID,
+                Quantity = orderItem.Quantity,
+                FinalUnitPrice = orderItem.FinalUnitPrice
+            };
+            return Ok(response);
         }
+
+        //[HttpPost]
+        //[JwtTokenFilter]
+        //[SwaggerOperation("PostOrder")]
+        //[SwaggerResponse(HttpStatusCode.OK)]
+        //[SwaggerResponse(HttpStatusCode.NotFound)]
+        //[SwaggerResponse(HttpStatusCode.InternalServerError)]
+        //public HttpResponseMessage PostOrder([FromBody] OrderModel orderInput)
+        //{
+        //    string userId = Request.UserId();
+
+        //    if (!userId.Equals(orderInput.userid))
+        //    {
+        //        return Request.CreateResponse(HttpStatusCode.Unauthorized);
+        //    }
+        //    Order order = db.Orders.SingleOrDefault(ord => ord.OrderID == orderInput.orderid);
+
+        //    if (order == null)
+        //    {
+        //        return Request.CreateResponse(HttpStatusCode.NotFound);
+        //    }
+
+        //    OrderType orderType = db.OrderTypes.SingleOrDefault(
+        //        ordtype => ordtype.OrderName.ToLower().Equals(orderInput.ordertype.ToLower()));
+
+        //    double subTotal = order.OrderItems.Sum(item => item.Product.YourPrice * item.Quantity);
+
+        //    double shipping = Math.Round(Helpers.GetShippingAndHandling(subTotal, order.OrderItems.Sum(item => item.Quantity)), 2);
+        //    double taxes = Math.Round(Helpers.GetTaxes(subTotal), 2);
+        //    double discounts = Math.Round(Helpers.GetDiscounts(subTotal), 2);
+
+        //    order.ShippingHandling = orderInput.shipping == 0 ?
+        //        shipping : Double.Parse(orderInput.shipping.ToString());
+        //    order.Taxes = orderInput.taxes == 0 ?
+        //        taxes : Double.Parse(orderInput.taxes.ToString());
+        //    order.Discounts = orderInput.discounts == 0 ?
+        //        discounts : Double.Parse(orderInput.discounts.ToString());
+
+        //    order.TrackingNumber = string.IsNullOrEmpty(orderInput.trackingnumber) ?
+        //        Helpers.GetTrackingNumber() : orderInput.trackingnumber;
+        //    order.OrderDate = DateTime.Now;
+        //    order.IsPurchased = orderInput.ispurchased;
+
+        //    order.OrderTypeID = string.IsNullOrEmpty(orderInput.ordertype) ?
+        //        order.OrderTypeID : orderType.OrderTypeID;
+
+        //    db.SaveChanges();
+
+        //    return Request.CreateResponse(HttpStatusCode.OK, order);
+        //}
 
         // DELETE: api/orderitemss/5
         [HttpDelete]
