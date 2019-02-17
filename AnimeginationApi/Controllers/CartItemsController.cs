@@ -88,6 +88,55 @@ namespace AnimeginationApi.Controllers
         {
             string userId = Request.UserId();
 
+            // Clean up the Duplicates first!
+            var totals = from os in db.Orders
+                         join ois in db.OrderItems on os.OrderID equals ois.OrderID
+                         where os.UserId == userId && os.OrderType.OrderName == carttype.ToLower()
+                         group ois by ois.ProductID into agg
+                         select new
+                         {
+                             ProductID = agg.Key,
+                             Quantity = agg.Sum(ois => ois.Quantity)
+                         };
+
+            var firstOrder = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
+                ord.OrderType.OrderName.ToLower().Equals(carttype.ToLower()))
+                .OrderBy(ord => ord.OrderID).FirstOrDefault();
+
+            IQueryable<Order> duplicateOrders = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
+                ord.OrderType.OrderName.ToLower().Equals(carttype.ToLower()))
+                .OrderBy(ord => ord.OrderID).Skip(1);
+
+            foreach (var total in totals)
+            {
+                OrderItem firstItem = db.OrderItems.Where(fi => fi.OrderID.Equals(firstOrder.OrderID) &&
+                    fi.ProductID.Equals(total.ProductID)).OrderBy(fi => fi.OrderItemID).FirstOrDefault();
+
+                if (firstItem != null)
+                {
+                    firstItem.Quantity = total.Quantity;
+                }
+            }
+
+            foreach (var total in totals)
+            {
+                IQueryable<OrderItem> duplicateItems = db.OrderItems.Where(fi => fi.OrderID.Equals(firstOrder.OrderID) &&
+                fi.ProductID.Equals(total.ProductID)).OrderBy(fi => fi.OrderItemID).Skip(1);
+
+                foreach (OrderItem dupe in duplicateItems)
+                {
+                    db.OrderItems.Remove(dupe);
+                }
+            }
+
+            foreach (Order dupe in duplicateOrders)
+            {
+                db.Orders.Remove(dupe);
+            }
+
+            await db.SaveChangesAsync();
+
+            // Duplicates have been removed at this point
             var items = 
                 db.Orders
                 .Join(
@@ -210,6 +259,25 @@ namespace AnimeginationApi.Controllers
 
             var orders = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
                 ord.OrderType.OrderName.ToLower().Equals(cartType.ToLower()));
+
+            foreach (var ord in orders) {
+                var orderItems = db.OrderItems.Where(oi => oi.OrderID.Equals(ord.OrderID));
+
+                foreach (var oi in orderItems) {
+                    // HEY REY!! REMOVE DUPLICATE ORDER ITEMS HERE!
+                }
+            }
+
+            var firstOrder = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
+                ord.OrderType.OrderName.ToLower().Equals(cartType.ToLower())).FirstOrDefault();
+
+            var duplicateOrders = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
+                ord.OrderType.OrderName.ToLower().Equals(cartType.ToLower()))
+                .GroupBy(ord => ord.OrderType.OrderName);
+
+            foreach(var dupe in duplicateOrders) {
+                var nani = dupe;
+            }
 
             foreach(var ord in orders)
             {

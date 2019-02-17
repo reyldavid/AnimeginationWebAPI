@@ -38,11 +38,15 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/OrderItems/5
         [JwtTokenFilter]
-        [SwaggerOperation("GetOrderItem")]
+        [SwaggerOperation("GetOrderItems")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         public async Task<IHttpActionResult> GetOrderItems(int id)
         {
+            if (string.IsNullOrEmpty(Request.UserId()))
+            {
+                return Unauthorized();
+            }
             string userId = Request.UserId();
 
             var orderItems =
@@ -57,6 +61,43 @@ namespace AnimeginationApi.Controllers
                 .Where(item => item.OrderID == id);
 
             return Ok(orderItems);
+        }
+
+        // GET: api/OrderItems/id/5
+        [Route("api/OrderItems/id/{id}", Name = "GetOrderItemById")]
+        [JwtTokenFilter]
+        [SwaggerOperation("GetOrderItemById")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        public async Task<IHttpActionResult> GetOrderItemById(int id)
+        {
+            if (string.IsNullOrEmpty(Request.UserId()))
+            {
+                return Unauthorized();
+            }
+            string userId = Request.UserId();
+
+            if (!this.OrderItemExists(id))
+            {
+                return NotFound();
+
+            }
+            var orderItem = db.OrderItems.SingleOrDefault(item => item.OrderItemID == id);
+
+            if (orderItem == null)
+            {
+                return NotFound();
+            }
+            var response = new
+            {
+                OrderItemID = orderItem.OrderItemID,
+                OrderID = orderItem.OrderID,
+                ProductID = orderItem.ProductID,
+                Quantity = orderItem.Quantity,
+                UnitPrice = orderItem.FinalUnitPrice
+            };
+
+            return Ok(response);
         }
 
         [HttpPut]
@@ -127,11 +168,14 @@ namespace AnimeginationApi.Controllers
 
             if (order == null)
             {
-                return Unauthorized();
+                return NotFound();
             }
-
-            OrderItem orderItem = db.OrderItems.SingleOrDefault(item => item.OrderItemID == orderItemInput.orderitemid);
-            
+            if (!this.OrderItemExists(orderItemInput.orderitemid))
+            {
+                return NotFound();
+            }
+            OrderItem orderItem = db.OrderItems.SingleOrDefault(item => 
+                    item.OrderItemID == orderItemInput.orderitemid);            
             if (orderItem == null)
             {
                 return NotFound();

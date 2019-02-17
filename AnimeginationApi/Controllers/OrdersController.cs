@@ -41,11 +41,12 @@ namespace AnimeginationApi.Controllers
         }
 
         // GET: api/Orders/5
+        [Route("api/Orders/id/{id}", Name = "GetOrdersByID")]
         [JwtTokenFilter]
-        [SwaggerOperation("GetOrders")]
+        [SwaggerOperation("GetOrdersById")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
-        public async Task<IHttpActionResult> GetOrders(int id)
+        public async Task<IHttpActionResult> GetOrdersById(int id)
         {
             string userId = Request.UserId();
 
@@ -74,7 +75,7 @@ namespace AnimeginationApi.Controllers
         [SwaggerOperation("GetOrdersByType")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
-        public async Task<IHttpActionResult> GetOrders(string carttype)
+        public async Task<IHttpActionResult> GetOrdersByType(string carttype)
         {
             string userId = Request.UserId();
             //OrderType orderType = db.OrderTypes.SingleOrDefault(
@@ -106,7 +107,7 @@ namespace AnimeginationApi.Controllers
                 OrderType = ord.OrderType.OrderName,
                 ItemQuantity = ord.OrderItems.Sum(item => item.Quantity),
                 ProductQuantity = ord.OrderItems.Count,
-                SubTotal = Math.Round(ord.OrderItems.Sum(item => item.Product.YourPrice * item.Quantity), 2)                
+                SubTotal = Math.Round(ord.OrderItems.Sum(item => item.Product.YourPrice * item.Quantity), 2)
             })
             .Where(ord => ord.OrderType.ToLower().Equals(carttype.ToLower()));
 
