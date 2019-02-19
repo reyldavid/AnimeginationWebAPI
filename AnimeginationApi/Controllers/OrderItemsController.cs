@@ -197,11 +197,101 @@ namespace AnimeginationApi.Controllers
             return Ok(response);
         }
 
-        //[HttpPost]
-        //[JwtTokenFilter]
-        //[SwaggerOperation("PostOrder")]
-        //[SwaggerResponse(HttpStatusCode.OK)]
-        //[SwaggerResponse(HttpStatusCode.NotFound)]
+        // GET: api/OrderItems/move/5/wish
+        [HttpGet]
+        [Route("api/OrderItems/move/{id}/{cartType}", Name = "MoveOrderItem")]
+        [JwtTokenFilter]
+        [SwaggerOperation("MoveOrderItem")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public HttpResponseMessage MoveOrderItem(int id, string cartType)
+        {
+            if (string.IsNullOrEmpty(Request.UserId()))
+            {
+                return Request.CreateResponse(HttpStatusCode.Unauthorized);
+            }
+            string userId = Request.UserId();
+
+            OrderType orderType = db.OrderTypes.SingleOrDefault(
+                ordtype => ordtype.OrderName.ToLower().Equals(cartType.ToLower()));
+
+            if (!this.OrderItemExists(id))
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+
+            }
+            OrderItem orderItem = db.OrderItems.SingleOrDefault(
+                oi => oi.OrderItemID.Equals(id));
+            //var productId = orderItem.ProductID;
+            //var quantity = orderItem.Quantity;
+            //var unitPrice = orderItem.FinalUnitPrice;
+
+            Order order = db.Orders.SingleOrDefault(ord => ord.OrderID == orderItem.OrderID);
+
+            if (order == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+            Order newOrder = db.Orders.SingleOrDefault(ord => ord.UserId.Equals(userId) &&
+                                ord.OrderType.OrderTypeID.Equals(orderType.OrderTypeID));
+            if (newOrder == null)
+            {
+                newOrder = new Order
+                {
+                    UserId = Request.UserId(),
+                    OrderDate = DateTime.Now,
+                    OrderType = orderType
+                };
+                db.Orders.Add(newOrder);
+
+                db.SaveChanges();
+            }
+
+            //Product product = db.Products.SingleOrDefault(prod => prod.ProductID == productId);
+
+            //OrderItem newOrderItem = new OrderItem
+            //{
+            //    Order = newOrder,
+            //    OrderID = newOrder.OrderID,
+            //    Product = product,
+            //    ProductID = product.ProductID,
+            //    Quantity = quantity,
+            //    FinalUnitPrice = unitPrice
+            //};
+
+            //db.OrderItems.Add(newOrderItem);
+
+
+            //OrderItem newOrderItem = new OrderItem
+            //{
+            //    Order = newOrder,
+            //    OrderID = newOrder.OrderID,
+            //    Product = orderItem.Product,
+            //    ProductID = orderItem.ProductID,
+            //    Quantity = orderItem.Quantity,
+            //    FinalUnitPrice = orderItem.FinalUnitPrice
+            //};
+            //db.SaveChanges();
+
+            //db.OrderItems.Remove(orderItem);
+
+            orderItem.Order = newOrder;
+            orderItem.OrderID = newOrder.OrderID;
+
+            //OrderItem newOrderItem = new OrderItem();
+            //db.OrderItems.Add(newOrderItem);
+            //db.Entry(newOrderItem).CurrentValues.SetValues( db.Entry(orderItem).CurrentValues );
+
+            //newOrderItem.Order = newOrder;
+            //newOrderItem.OrderID = newOrder.OrderID;
+            //db.OrderItems.Remove(orderItem);
+
+            db.SaveChanges();
+
+            return Request.CreateResponse(HttpStatusCode.OK, orderItem);
+        }
+
         //[SwaggerResponse(HttpStatusCode.InternalServerError)]
         //public HttpResponseMessage PostOrder([FromBody] OrderModel orderInput)
         //{
