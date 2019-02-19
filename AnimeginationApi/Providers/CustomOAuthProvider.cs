@@ -23,8 +23,10 @@ namespace AnimeginationApi.Providers
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
             var allowedOrigin = "*";
+            var allowedMethods = "*";
 
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { allowedOrigin });
+            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Methods", new[] { allowedMethods });
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
 

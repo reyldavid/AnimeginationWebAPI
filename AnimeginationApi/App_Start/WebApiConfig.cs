@@ -68,6 +68,8 @@ namespace AnimeginationApi
                     new HttpControllerDispatcher(config),
                     AuthenticatedAdminHandlers);
 
+            config.EnableCors();
+
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
