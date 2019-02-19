@@ -8,9 +8,11 @@ using Swashbuckle.Swagger.Annotations;
 using AnimeginationApi.Filters;
 using System.Threading.Tasks;
 using AnimeginationApi.Services;
+using System.Web.Http.Cors;
 
 namespace AnimeginationApi.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class CartItemsController : ApiController
     {
         private AnimeDB db = new AnimeDB();
@@ -254,30 +256,15 @@ namespace AnimeginationApi.Controllers
         {
             string userId = Request.UserId();
 
-            //OrderType orderType = db.OrderTypes.SingleOrDefault(
-            //    ordtype => ordtype.OrderName.ToLower().Equals(cartType.ToLower()));
-
             var orders = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
                 ord.OrderType.OrderName.ToLower().Equals(cartType.ToLower()));
-
-            foreach (var ord in orders) {
-                var orderItems = db.OrderItems.Where(oi => oi.OrderID.Equals(ord.OrderID));
-
-                foreach (var oi in orderItems) {
-                    // HEY REY!! REMOVE DUPLICATE ORDER ITEMS HERE!
-                }
-            }
 
             var firstOrder = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
                 ord.OrderType.OrderName.ToLower().Equals(cartType.ToLower())).FirstOrDefault();
 
             var duplicateOrders = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
                 ord.OrderType.OrderName.ToLower().Equals(cartType.ToLower()))
-                .GroupBy(ord => ord.OrderType.OrderName);
-
-            foreach(var dupe in duplicateOrders) {
-                var nani = dupe;
-            }
+                .GroupBy(ord => ord.OrderType.OrderName).Skip(1);
 
             foreach(var ord in orders)
             {
@@ -305,6 +292,68 @@ namespace AnimeginationApi.Controllers
                 ord.OrderType.ToLower().Equals(cartType.ToLower()));
 
             return Ok(totals);
+        }
+
+        [HttpPut]
+        [JwtTokenFilter]
+        [SwaggerOperation("PutCartItem")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public async Task<IHttpActionResult> PutCartItem([FromBody] CartItemModel itemInput)
+        {
+            if (string.IsNullOrEmpty(Request.UserId()))
+            {
+                return Unauthorized();
+            }
+            string userId = Request.UserId();
+
+            OrderType orderType = db.OrderTypes.SingleOrDefault(ot => 
+                ot.OrderName.ToLower().Equals(itemInput.ordertype));
+
+            Order order = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
+                ord.OrderType.OrderTypeID.Equals(orderType.OrderTypeID)).FirstOrDefault();
+
+            if (order == null)
+            {
+                order = new Order
+                {
+                    UserId = Request.UserId(),
+                    OrderDate = DateTime.Now
+                };
+                db.Orders.Add(order);
+
+                db.SaveChanges();
+            }
+
+            Product product = db.Products.SingleOrDefault(prod => prod.ProductID == itemInput.productid);
+
+            OrderItem orderItem = db.OrderItems.SingleOrDefault(oi => oi.OrderID.Equals(order.OrderID) 
+                                    && oi.ProductID.Equals(itemInput.productid));
+
+            if (orderItem == null)
+            {
+                orderItem = new OrderItem
+                {
+                    Order = order,
+                    OrderID = order.OrderID,
+                    Product = product,
+                    ProductID = product.ProductID,
+                    Quantity = itemInput.quantity,
+                    FinalUnitPrice = Double.Parse(itemInput.unitprice.ToString())
+                };
+                db.OrderItems.Add(orderItem);
+            }
+            else
+            {
+                orderItem.Quantity += itemInput.quantity;
+            }
+            //db.SaveChanges();
+
+            Helpers.UpdateOrder(ref order);
+            db.SaveChanges();
+
+            return Ok(orderItem);
         }
 
         protected override void Dispose(bool disposing)
