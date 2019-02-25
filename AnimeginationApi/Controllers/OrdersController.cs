@@ -84,6 +84,11 @@ namespace AnimeginationApi.Controllers
             var orders = db.Orders.Where(ord => ord.UserId.Equals(userId) &&
                 ord.OrderType.OrderName.ToLower().Equals(carttype.ToLower()));
 
+            if (!orders.Any())
+            {
+                return Ok(new { });
+            }
+
             foreach (var ord in orders)
             {
                 Order order = db.Orders.Where(o => o.OrderID == ord.OrderID).FirstOrDefault();
@@ -109,8 +114,12 @@ namespace AnimeginationApi.Controllers
                 ProductQuantity = ord.OrderItems.Count,
                 SubTotal = Math.Round(ord.OrderItems.Sum(item => item.Product.YourPrice * item.Quantity), 2)
             })
-            .Where(ord => ord.OrderType.ToLower().Equals(carttype.ToLower()));
+            .SingleOrDefault(ord => ord.OrderType.ToLower().Equals(carttype.ToLower()));
 
+            if (totals == null)
+            {
+                return Ok(new { });
+            }
             return Ok(totals);
         }
 

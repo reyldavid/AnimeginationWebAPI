@@ -223,9 +223,6 @@ namespace AnimeginationApi.Controllers
             }
             OrderItem orderItem = db.OrderItems.SingleOrDefault(
                 oi => oi.OrderItemID.Equals(id));
-            //var productId = orderItem.ProductID;
-            //var quantity = orderItem.Quantity;
-            //var unitPrice = orderItem.FinalUnitPrice;
 
             Order order = db.Orders.SingleOrDefault(ord => ord.OrderID == orderItem.OrderID);
 
@@ -248,6 +245,9 @@ namespace AnimeginationApi.Controllers
                 db.SaveChanges();
             }
 
+            //var productId = orderItem.ProductID;
+            //var quantity = orderItem.Quantity;
+            //var unitPrice = orderItem.FinalUnitPrice;
             //Product product = db.Products.SingleOrDefault(prod => prod.ProductID == productId);
 
             //OrderItem newOrderItem = new OrderItem
@@ -261,6 +261,10 @@ namespace AnimeginationApi.Controllers
             //};
 
             //db.OrderItems.Add(newOrderItem);
+
+            //newOrder.OrderItems.Add(newOrderItem);
+
+            //order.OrderItems.Remove(orderItem);
 
 
             //OrderItem newOrderItem = new OrderItem
@@ -355,8 +359,21 @@ namespace AnimeginationApi.Controllers
                 return NotFound();
             }
 
+            Order order = db.Orders.SingleOrDefault(ord => ord.OrderID == orderItem.OrderID);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
             db.OrderItems.Remove(orderItem);
-            await db.SaveChangesAsync();
+
+            if (order.OrderItems.Count == 0)
+            {
+                db.Orders.Remove(order);
+            }
+            //await db.SaveChangesAsync();
+            db.SaveChanges();
 
             return Ok(orderItem);
         }

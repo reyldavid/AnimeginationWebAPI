@@ -25,7 +25,8 @@ namespace AnimeginationApi.Providers
             var allowedOrigin = "*";
             var allowedMethods = "*";
 
-            context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { allowedOrigin });
+            //context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { allowedOrigin });
+            context.OwinContext.Response.Headers.Set("Access-Control-Allow-Origin", allowedOrigin );
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Methods", new[] { allowedMethods });
 
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();

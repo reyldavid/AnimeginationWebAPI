@@ -12,7 +12,7 @@ using System.Web.Http.Cors;
 
 namespace AnimeginationApi.Controllers
 {
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
+    //[EnableCors(origins: "*", headers: "*", methods: "*")]
     public class CartItemsController : ApiController
     {
         private AnimeDB db = new AnimeDB();
@@ -319,7 +319,9 @@ namespace AnimeginationApi.Controllers
                 order = new Order
                 {
                     UserId = Request.UserId(),
-                    OrderDate = DateTime.Now
+                    OrderDate = DateTime.Now,
+                    OrderType = orderType,
+                    OrderTypeID = orderType.OrderTypeID,
                 };
                 db.Orders.Add(order);
 
