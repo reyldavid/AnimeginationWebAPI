@@ -9,6 +9,7 @@ using AnimeginationApi.Filters;
 using System.Threading.Tasks;
 using AnimeginationApi.Services;
 using System.Web.Http.Cors;
+using System.Collections.Generic;
 
 namespace AnimeginationApi.Controllers
 {
@@ -194,7 +195,8 @@ namespace AnimeginationApi.Controllers
             return Ok(items);
         }
 
-        // GET: api/CartItems/5
+        // GET: api/CartItems/item/5
+        [Route("api/cartitems/item/{id}", Name = "GetCartItem")]
         [JwtTokenFilter]
         [SwaggerOperation("GetCartItem")]
         [SwaggerResponse(HttpStatusCode.OK)]
@@ -247,7 +249,7 @@ namespace AnimeginationApi.Controllers
         }
 
         // GET: api/CartTotals/5
-        [Route("api/carttotals")]
+        [Route("api/carttotals/{cartType}")]
         [JwtTokenFilter]
         [SwaggerOperation("GetCartTotals")]
         [SwaggerResponse(HttpStatusCode.OK)]
@@ -293,6 +295,80 @@ namespace AnimeginationApi.Controllers
 
             return Ok(totals);
         }
+
+        // GET: api/additem/5/visited
+        [HttpGet]
+        [Route("api/additem/{productId}/{cartType}", Name = "AddCartItem")]
+        [JwtTokenFilter]
+        [SwaggerOperation("AddCartItem")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public async Task<IHttpActionResult> AddCartItem(int productId, string cartType)
+        {
+            if (string.IsNullOrEmpty(Request.UserId()))
+            {
+                return Unauthorized();
+            }
+            string userId = Request.UserId();
+
+            OrderType orderType = db.OrderTypes.SingleOrDefault(
+                ordtype => ordtype.OrderName.ToLower().Equals(cartType.ToLower()));
+
+            Product product = db.Products.SingleOrDefault(prod => prod.ProductID == productId);
+
+            Order order = db.Orders.SingleOrDefault(ord => ord.UserId.Equals(userId) &&
+                                ord.OrderType.OrderTypeID.Equals(orderType.OrderTypeID));
+            if (order == null)
+            {
+                order = new Order
+                {
+                    UserId = Request.UserId(),
+                    OrderDate = DateTime.Now,
+                    OrderType = orderType
+                };
+                db.Orders.Add(order);
+
+                db.SaveChanges();
+            }
+
+            OrderItem orderItem = order.OrderItems.SingleOrDefault(
+                oi => oi.ProductID.Equals(productId));
+
+            if (orderItem == null)
+            {
+                orderItem = new OrderItem
+                {
+                    Order = order,
+                    OrderID = order.OrderID,
+                    Product = product,
+                    ProductID = product.ProductID,
+                    Quantity = 1,
+                    FinalUnitPrice = product.YourPrice,
+                    ItemDate = DateTime.Now
+                };
+                db.OrderItems.Add(orderItem);
+                order.OrderItems.Add(orderItem);
+            }
+            else
+            {
+                orderItem.ItemDate = DateTime.Now;
+            }
+            db.SaveChanges();
+
+            int skip = "VisitedMaxNumber".GetConfigurationNumericValue();
+
+            IEnumerable<OrderItem> excessItems = order.OrderItems.OrderByDescending(oi => oi.ItemDate).Skip(skip);
+
+            foreach (OrderItem excess in excessItems)
+            {
+                db.OrderItems.Remove(excess);
+            }
+            db.SaveChanges();
+
+            return Ok(orderItem);
+        }
+
 
         [HttpPut]
         [JwtTokenFilter]
@@ -342,7 +418,8 @@ namespace AnimeginationApi.Controllers
                     Product = product,
                     ProductID = product.ProductID,
                     Quantity = itemInput.quantity,
-                    FinalUnitPrice = Double.Parse(itemInput.unitprice.ToString())
+                    FinalUnitPrice = Double.Parse(itemInput.unitprice.ToString()),
+                    ItemDate = DateTime.Now
                 };
                 db.OrderItems.Add(orderItem);
             }
