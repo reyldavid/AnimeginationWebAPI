@@ -136,7 +136,8 @@ namespace AnimeginationApi.Controllers
                 Product = product,
                 ProductID = product.ProductID,
                 Quantity = itemInput.quantity,
-                FinalUnitPrice = Double.Parse(itemInput.unitprice.ToString())
+                FinalUnitPrice = Double.Parse(itemInput.unitprice.ToString()),
+                ItemDate = DateTime.Now
             };
 
             db.OrderItems.Add(item);
@@ -282,6 +283,7 @@ namespace AnimeginationApi.Controllers
 
             orderItem.Order = newOrder;
             orderItem.OrderID = newOrder.OrderID;
+            orderItem.ItemDate = DateTime.Now;
 
             //OrderItem newOrderItem = new OrderItem();
             //db.OrderItems.Add(newOrderItem);

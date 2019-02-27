@@ -12,5 +12,6 @@ namespace AnimeginationApi.Models
         public int productid { get; set; }
         public int quantity { get; set; }
         public decimal unitprice { get; set; }
+        public DateTime itemdate { get; set; }
     }
 }
