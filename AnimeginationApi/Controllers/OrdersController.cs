@@ -16,12 +16,14 @@ namespace AnimeginationApi.Controllers
         private AnimeDB db = new AnimeDB();
 
         // GET: api/Orders
-        [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetOrders")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         public async Task<IHttpActionResult> GetOrders()
         {
+            string userId = Request.UserId();
+
             var orders = 
             db.Orders.Select(ord => new
             {
@@ -35,7 +37,9 @@ namespace AnimeginationApi.Controllers
                 IsPurchased = ord.IsPurchased,
                 TrackingNumber = ord.TrackingNumber,
                 OrderType = ord.OrderType.OrderName
-            }).AsEnumerable();
+            })
+            .Where(item => item.UserId.Equals(userId));
+            // }).AsEnumerable();
 
             return Ok(orders);
         }

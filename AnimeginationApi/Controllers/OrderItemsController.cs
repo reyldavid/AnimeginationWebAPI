@@ -24,6 +24,11 @@ namespace AnimeginationApi.Controllers
         [SwaggerResponse(HttpStatusCode.NotFound)]
         public async Task<IHttpActionResult> GetOrderItems()
         {
+            string userId = Request.UserId();
+
+            var orderIds = db.Orders.Where(o => o.UserId.Equals(userId))
+                .Select(uo => uo.UserId).ToArray();
+
             var orderItems = db.OrderItems.Select(item => new
             {
                 OrderItemID = item.OrderItemID,
@@ -31,7 +36,8 @@ namespace AnimeginationApi.Controllers
                 ProductID = item.ProductID,
                 Quantity = item.Quantity,
                 UnitPrice = item.FinalUnitPrice
-            }).AsEnumerable();
+            }).Where(item => Array.Exists(orderIds, id => id.Equals(item.OrderID)));
+            // }).AsEnumerable();
 
             return Ok(orderItems);
         }
