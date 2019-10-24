@@ -189,6 +189,8 @@
     <Compile Include="Controllers\SimilarsController.cs" />
     <Compile Include="Controllers\StatesController.cs" />
     <Compile Include="Controllers\UserAccountsController.cs" />
+    <Compile Include="Controllers\UserFeedbackController.cs" />
+    <Compile Include="Controllers\UserNotesController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Filters\AdminRoleFilter.cs" />
     <Compile Include="Filters\JwtTokenFilter.cs" />
@@ -229,8 +231,10 @@
     <Compile Include="Models\TokenModel.cs" />
     <Compile Include="Models\UserAccount.cs" />
     <Compile Include="Models\UserFeedback.cs" />
+    <Compile Include="Models\UserFeedbackModel.cs" />
     <Compile Include="Models\UserInfo.cs" />
     <Compile Include="Models\UserNote.cs" />
+    <Compile Include="Models\UserNoteModel.cs" />
     <Compile Include="Models\UserProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\CustomOAuthProvider.cs" />

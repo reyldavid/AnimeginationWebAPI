@@ -5,6 +5,8 @@ using System.Net;
 using System.Web.Http;
 using AnimeginationApi.Models;
 using Swashbuckle.Swagger.Annotations;
+using AnimeginationApi.Filters;
+using System.Threading.Tasks;
 
 namespace AnimeginationApi.Controllers
 {
@@ -48,72 +50,93 @@ namespace AnimeginationApi.Controllers
             return category;
         }
 
-        //// PUT: api/Categories/5
-        //[ResponseType(typeof(void))]
-        //public async Task<IHttpActionResult> PutCategory(int id, Category category)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // PUT: api/Categories
+        [HttpPut]
+        [AdminRoleFilter]
+        [SwaggerOperation("PutCategory")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public async Task<IHttpActionResult> PutCategory([FromBody] Category categoryInput)
+        {
+            string userId = Request.UserId();
 
-        //    if (id != category.CategoryID)
-        //    {
-        //        return BadRequest();
-        //    }
+            Category category = new Category {
+                CategoryID = categoryInput.CategoryID, 
+                CategoryName = categoryInput.CategoryName, 
+                Description = categoryInput.Description, 
+                ImageFile = categoryInput.ImageFile
+            };
 
-        //    db.Entry(category).State = EntityState.Modified;
+            db.Categories.Add(category);
+            db.SaveChanges();
 
-        //    try
-        //    {
-        //        await db.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CategoryExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            var response = new
+            {
+                CategoryID = category.CategoryID, 
+                CategoryName = category.CategoryName,
+                Description = category.Description, 
+                ImageFile = category.ImageFile 
+            };
+            return Ok(response);
+        }
 
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+        // POST: api/Categories
+        [HttpPost]
+        [AdminRoleFilter]
+        [SwaggerOperation("PostCategory")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public async Task<IHttpActionResult> PostCategory([FromBody] Category categoryInput)
+        {
+            if (!this.CategoryExists(categoryInput.CategoryID)) {
+                return NotFound();
+            }
+            Category category = db.Categories.SingleOrDefault(item => 
+                item.CategoryID == categoryInput.CategoryID);
+            if (category == null) {
+                return NotFound();
+            }
+            category.CategoryName = categoryInput.CategoryName;
+            category.Description = categoryInput.Description;
+            category.ImageFile = categoryInput.ImageFile;
+            db.SaveChanges();
 
-        //// POST: api/Categories
-        //[ResponseType(typeof(Category))]
-        //public async Task<IHttpActionResult> PostCategory(Category category)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+            var response = new {
+                CategoryID = category.CategoryID,
+                CategoryName = category.CategoryName, 
+                Description = category.Description,
+                ImageFile = category.ImageFile 
+            };
+            return Ok(response);
+        }
 
-        //    db.Categories.Add(category);
-        //    await db.SaveChangesAsync();
+        // DELETE: api/categories/5
+        [HttpDelete]
+        [AdminRoleFilter]
+        [SwaggerOperation("DeleteCategory")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.Unauthorized)]
+        [SwaggerResponse(HttpStatusCode.Forbidden)]
+        public async Task<IHttpActionResult> DeleteCategory(int id)
+        {
+            // Delete Categories Record
+            Category category = db.Categories.SingleOrDefault(item => item.CategoryID == id);
 
-        //    return CreatedAtRoute("DefaultApi", new { id = category.CategoryID }, category);
-        //}
+            if (category == null)
+            {
+                return NotFound();
+            }
 
-        //// DELETE: api/Categories/5
-        //[ResponseType(typeof(Category))]
-        //public async Task<IHttpActionResult> DeleteCategory(int id)
-        //{
-        //    Category category = await db.Categories.FindAsync(id);
-        //    if (category == null)
-        //    {
-        //        return NotFound();
-        //    }
+            db.Categories.Remove(category);
+            //await db.SaveChangesAsync();
+            db.SaveChanges();
 
-        //    db.Categories.Remove(category);
-        //    await db.SaveChangesAsync();
-
-        //    return Ok(category);
-        //}
-
+            return Ok(category);
+        }
+        
         protected override void Dispose(bool disposing)
         {
             if (disposing)
