@@ -21,6 +21,7 @@ namespace AnimeginationApi.Controllers
         // GET: api/UserAccounts
         [Route("api/useraccounts/all")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetUserAccountsAll")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -28,23 +29,40 @@ namespace AnimeginationApi.Controllers
         [SwaggerResponse(HttpStatusCode.Forbidden)]
         public IEnumerable<object> GetUserAccountsAll()
         {
-            var userAccounts =
-                db.UserAccounts.Select(ua => new
+
+            // var userFeedbacks = db.UserFeedbacks
+            //     .Join(db.UserAccounts,
+            //         feed => feed.UserId,
+            //         user => user.UserId,
+            //         (feed, user) => new {feed, user})
+            //     .Join(db.Products,
+            //         fu => fu.feed.ProductId,
+            //         prod => prod.ProductID,
+            //         (fu, prod) => new {fu, prod })
+
+            var userAccounts = db.UserAccounts
+                .Join(db.AspnetUsers,
+                    a => a.UserId,
+                    u => u.ID,
+                    (a, u) => new {a, u})
+                .Select(ua => new UserAccountModel
                 {
-                    UserId = ua.UserId,
-                    FirstName = ua.FirstName,
-                    LastName = ua.LastName,
-                    Address = ua.StreetAddress,
-                    City = ua.City,
-                    State = ua.State.StateName,
-                    ZipCode = ua.ZipCode,
-                    CellPhone = ua.CellPhoneNumber,
-                    HomePhone = ua.HomePhoneNumber,
-                    Email = ua.EmailAddress,
-                    Created = ua.Created,
-                    CreditCardType = ua.CreditCardType,
-                    CreditCardNumber = ua.CreditCardNumber,
-                    CreditCardExpiration = ua.CreditCardExpiration
+                    UserId = ua.a.UserId,
+                    UserName = ua.u.UserName,
+                    FirstName = ua.a.FirstName,
+                    LastName = ua.a.LastName,
+                    Address = ua.a.StreetAddress,
+                    City = ua.a.City,
+                    State = ua.a.State.StateCode,
+                    StateId = ua.a.StateId,
+                    ZipCode = ua.a.ZipCode,
+                    CellPhone = ua.a.CellPhoneNumber,
+                    HomePhone = ua.a.HomePhoneNumber,
+                    Email = ua.a.EmailAddress,
+                    Created = ua.a.Created,
+                    CreditCardType = ua.a.CreditCardType,
+                    CreditCardNumber = ua.a.CreditCardNumber,
+                    CreditCardExpiration = ua.a.CreditCardExpiration
                 }).AsEnumerable();
 
             return userAccounts;
@@ -52,7 +70,9 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/UserAccounts/Guid
         [HttpGet]
+        [Route("api/UserAccounts/id")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetUserAccounts")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -85,6 +105,7 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/UserAccounts
         [HttpGet]
+        [Route("api/useraccounts")]
         [JwtTokenFilter]
         [SwaggerOperation("GetUserAccounts")]
         [SwaggerResponse(HttpStatusCode.OK)]
@@ -121,10 +142,12 @@ namespace AnimeginationApi.Controllers
             return userAccount;
         }
 
-        [SwaggerOperation("PostUserAccount")]
+        [HttpPut]
+        [Route("api/useraccounts")]
+        [SwaggerOperation("PutUserAccount")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        public HttpResponseMessage PostUserAccount([FromBody] ApiUserAccount apiUserAccount)
+        public HttpResponseMessage PutUserAccount([FromBody] ApiUserAccount apiUserAccount)
         {
             HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -166,14 +189,50 @@ namespace AnimeginationApi.Controllers
             return response;
         }
 
-        [HttpPut]
-        [Route("api/useraccounts/names")]
+        [HttpPost]
+        [Route("api/useraccounts")]
+        [AdminRoleFilter]
         [JwtTokenFilter]
-        [SwaggerOperation("PutUserAccountNames")]
+        [SwaggerOperation("PostUserAccount")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        public HttpResponseMessage PutUserAccountNames([FromBody] ApiUserAccount apiUserAccount)
+        public HttpResponseMessage PostUserAccount([FromBody] ApiUserAccount apiUserAccount)
+        {
+
+            UserAccount account = db.UserAccounts.SingleOrDefault(ua => ua.UserId == apiUserAccount.UserId);
+
+            if (account == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            account.FirstName = string.IsNullOrEmpty(apiUserAccount.FirstName) ? account.FirstName : apiUserAccount.FirstName;
+            account.LastName = string.IsNullOrEmpty(apiUserAccount.LastName) ? account.LastName : apiUserAccount.LastName;
+            account.EmailAddress = string.IsNullOrEmpty(apiUserAccount.Email) ? account.EmailAddress : apiUserAccount.Email;
+            account.CellPhoneNumber = string.IsNullOrEmpty(apiUserAccount.CellPhone) ? account.CellPhoneNumber : apiUserAccount.CellPhone;
+            account.HomePhoneNumber = string.IsNullOrEmpty(apiUserAccount.HomePhone) ? account.HomePhoneNumber : apiUserAccount.HomePhone;
+            account.StreetAddress = string.IsNullOrEmpty(apiUserAccount.Address) ? account.StreetAddress : apiUserAccount.Address;
+            account.City = string.IsNullOrEmpty(apiUserAccount.City) ? account.City : apiUserAccount.City;
+            account.StateId = apiUserAccount.StateId == 0 ? account.StateId : apiUserAccount.StateId;
+            account.ZipCode = string.IsNullOrEmpty(apiUserAccount.ZipCode) ? account.ZipCode : apiUserAccount.ZipCode;
+            account.CreditCardType = string.IsNullOrEmpty(apiUserAccount.CreditCardType) ? account.CreditCardType : apiUserAccount.CreditCardType;
+            account.CreditCardNumber = string.IsNullOrEmpty(apiUserAccount.CreditCardNumber) ? account.CreditCardNumber : apiUserAccount.CreditCardNumber;
+            account.CreditCardExpiration = string.IsNullOrEmpty(apiUserAccount.CreditCardExpiration) ? account.CreditCardExpiration : apiUserAccount.CreditCardExpiration;
+
+            db.SaveChanges();
+
+            return Request.CreateResponse(HttpStatusCode.OK, account);
+        }
+
+        [HttpPost]
+        [Route("api/useraccounts/names")]
+        [JwtTokenFilter]
+        [SwaggerOperation("PostUserAccountNames")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public HttpResponseMessage PostUserAccountNames([FromBody] ApiUserAccount apiUserAccount)
         {
             string userId = Request.UserId();
 
@@ -200,14 +259,14 @@ namespace AnimeginationApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, account);
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/useraccounts/address")]
         [JwtTokenFilter]
-        [SwaggerOperation("PutUserAccountAddress")]
+        [SwaggerOperation("PostUserAccountAddress")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         [SwaggerResponse(HttpStatusCode.InternalServerError)]
-        public HttpResponseMessage PutUserAccountAddress([FromBody] ApiUserAccount apiUserAccount)
+        public HttpResponseMessage PostUserAccountAddress([FromBody] ApiUserAccount apiUserAccount)
         {
             string userId = Request.UserId();
 
@@ -239,7 +298,9 @@ namespace AnimeginationApi.Controllers
 
         // DELETE: api/useraccounts/guid
         [HttpDelete]
+        [Route("api/useraccounts")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteUserAccounts")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]

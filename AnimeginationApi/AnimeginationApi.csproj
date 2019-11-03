@@ -230,6 +230,7 @@
     <Compile Include="Models\State.cs" />
     <Compile Include="Models\TokenModel.cs" />
     <Compile Include="Models\UserAccount.cs" />
+    <Compile Include="Models\UserAccountModel.cs" />
     <Compile Include="Models\UserFeedback.cs" />
     <Compile Include="Models\UserFeedbackModel.cs" />
     <Compile Include="Models\UserInfo.cs" />
