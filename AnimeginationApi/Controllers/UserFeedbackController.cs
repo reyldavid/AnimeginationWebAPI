@@ -17,6 +17,7 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/UserFeedbacks
         [SwaggerOperation("GetUserFeedbacks")]
+        [AdminRoleFilter]
         [JwtTokenFilter]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -24,20 +25,47 @@ namespace AnimeginationApi.Controllers
         {
             string userId = Request.UserId();
 
-            var feedbacks =
-            db.UserFeedbacks.Select(feedback => new
-            {
-                feedbackId = feedback.FeedbackId,
-                userId = feedback.UserId,
-                feedbackType = feedback.FeedbackType,
-                productId = feedback.ProductId, 
-                rating = feedback.RatingID, 
-                title = feedback.Title, 
-                feedback = feedback.Feedback, 
-                created = feedback.Created
-            }).Where(review => review.userId == userId);
+            // var feedbacks =
+            // db.UserFeedbacks.Select(feedback => new
+            // {
+            //     feedbackId = feedback.FeedbackId,
+            //     userId = feedback.UserId,
+            //     feedbackType = feedback.FeedbackType,
+            //     productId = feedback.ProductId, 
+            //     rating = feedback.RatingID, 
+            //     title = feedback.Title, 
+            //     feedback = feedback.Feedback, 
+            //     created = feedback.Created
+            // }).Where(review => review.userId == userId);
+                // .Where(review => review.fu.feed.UserId == userId)
 
-            return Ok(feedbacks);
+            var userFeedbacks = db.UserFeedbacks
+                .Join(db.UserAccounts,
+                    feed => feed.UserId,
+                    user => user.UserId,
+                    (feed, user) => new {feed, user})
+                .Join(db.Products,
+                    fu => fu.feed.ProductId,
+                    prod => prod.ProductID,
+                    (fu, prod) => new {fu, prod })
+                .Select(feedback => new {
+                    feedbackId = feedback.fu.feed.FeedbackId,
+                    userId = feedback.fu.feed.UserId,
+                    firstName = feedback.fu.user.FirstName,
+                    lastName = feedback.fu.user.LastName,
+                    email = feedback.fu.user.EmailAddress,
+                    feedbackType = feedback.fu.feed.FeedbackType,
+                    productId = feedback.fu.feed.ProductId,
+                    productCode = feedback.prod.ProductCode,
+                    productTitle = feedback.prod.ProductTitle,
+                    rating = feedback.fu.feed.RatingID, 
+                    title = feedback.fu.feed.Title, 
+                    feedback = feedback.fu.feed.Feedback, 
+                    created = feedback.fu.feed.Created
+                }).OrderByDescending(oid => oid.feedbackId)
+                .AsEnumerable();
+
+            return Ok(userFeedbacks);
         }
 
         // GET: api/UserFeedbacks/5
@@ -103,8 +131,10 @@ namespace AnimeginationApi.Controllers
         }
 
         // DELETE: api/UserFeedbacks/guid
+        [Route("api/UserFeedback/{id}")] 
         [HttpDelete]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteUserFeedback")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
