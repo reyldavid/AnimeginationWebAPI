@@ -17,23 +17,40 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/Notes
         [SwaggerOperation("GetUserNotes")]
+        [AdminRoleFilter]
         [JwtTokenFilter]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         public async Task<IHttpActionResult> GetUserNotes()
         {
-            var notes =
-            db.UserNotes.Select(note => new
-            {
-                noteId = note.UserNoteId,
-                userId = note.UserId,
-                correspondenceType = note.CorrespondenceType,
-                title = note.Title, 
-                note = note.Note, 
-                created = note.Created
-            }).AsEnumerable();
+            // var notes =
+            // db.UserNotes.Select(note => new
+            // {
+            //     noteId = note.UserNoteId,
+            //     userId = note.UserId,
+            //     correspondenceType = note.CorrespondenceType,
+            //     title = note.Title, 
+            //     note = note.Note, 
+            //     created = note.Created
+            // }).AsEnumerable();
 
-            return Ok(notes);
+            var userNotes = db.UserNotes.Join(db.UserAccounts,
+                notes => notes.UserId,
+                user => user.UserId,
+                (notes, user) => new {notes, user})
+                .Select(note => new {
+                    noteId = note.notes.UserNoteId,
+                    firstName = note.user.FirstName,
+                    lastName = note.user.LastName,
+                    email = note.user.EmailAddress,
+                    correspondenceType = note.notes.CorrespondenceType,
+                    title = note.notes.Title,
+                    note = note.notes.Note,
+                    created = note.notes.Created
+                }).OrderByDescending(nid => nid.noteId)
+                .AsEnumerable();
+
+            return Ok(userNotes);
         }
 
         // GET: api/Notes/5
@@ -101,8 +118,10 @@ namespace AnimeginationApi.Controllers
         }
 
         // DELETE: api/Notes/guid
+        [Route("api/UserNotes/{id}")] 
         [HttpDelete]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteUserNote")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -118,7 +137,8 @@ namespace AnimeginationApi.Controllers
             }
 
             db.UserNotes.Remove(note);
-            await db.SaveChangesAsync();
+            // await db.SaveChangesAsync();
+            db.SaveChanges();
 
             return Ok(note);
         }
