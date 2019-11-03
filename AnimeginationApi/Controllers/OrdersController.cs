@@ -240,6 +240,7 @@ namespace AnimeginationApi.Controllers
         // DELETE: api/orders/guid
         [HttpDelete]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteOrder")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]

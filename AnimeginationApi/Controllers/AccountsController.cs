@@ -19,6 +19,7 @@ namespace AnimeginationApi.Controllers
     {
         [Route("users")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetUsers")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -31,6 +32,7 @@ namespace AnimeginationApi.Controllers
 
         [Route("user/{id:guid}", Name = "GetUserById")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetUser")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -49,6 +51,7 @@ namespace AnimeginationApi.Controllers
 
         [Route("user/{username}")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetUserByName")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -198,6 +201,7 @@ namespace AnimeginationApi.Controllers
         [HttpDelete]
         [Route("user/{id:guid}")]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteUser")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]

@@ -19,6 +19,7 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/OrderItems
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("GetOrderItems")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]

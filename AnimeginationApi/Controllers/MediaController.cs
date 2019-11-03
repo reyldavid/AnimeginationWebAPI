@@ -52,6 +52,7 @@ namespace AnimeginationApi.Controllers
         // PUT: api/Media
         [HttpPut]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("PutMedium")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -81,6 +82,7 @@ namespace AnimeginationApi.Controllers
         // POST: api/Media
         [HttpPost]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("PostMedium")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -126,6 +128,7 @@ namespace AnimeginationApi.Controllers
         // DELETE: api/media/5
         [HttpDelete]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteMedium")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]

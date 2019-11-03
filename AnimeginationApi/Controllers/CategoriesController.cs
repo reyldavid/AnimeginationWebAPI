@@ -53,6 +53,7 @@ namespace AnimeginationApi.Controllers
         // PUT: api/Categories
         [HttpPut]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("PutCategory")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -84,6 +85,7 @@ namespace AnimeginationApi.Controllers
         // POST: api/Categories
         [HttpPost]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("PostCategory")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
@@ -115,6 +117,7 @@ namespace AnimeginationApi.Controllers
         // DELETE: api/categories/5
         [HttpDelete]
         [AdminRoleFilter]
+        [JwtTokenFilter]
         [SwaggerOperation("DeleteCategory")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
