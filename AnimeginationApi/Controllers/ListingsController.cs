@@ -6,6 +6,8 @@ using System.Net;
 using System.Web.Http;
 using AnimeginationApi.Models;
 using Swashbuckle.Swagger.Annotations;
+using AnimeginationApi.Filters;
+using System.Threading.Tasks;
 
 namespace AnimeginationApi.Controllers
 {
@@ -44,10 +46,11 @@ namespace AnimeginationApi.Controllers
                 RatingID = lists.Product.RatingID
             })
             .Where(list => list.EffectiveDate < DateTime.Now && list.Expiration > DateTime.Now)
+            .OrderBy(lt => lt.ListingTypeID)
+            .ThenByDescending(ld => ld.Expiration).ThenBy(lr => lr.Rank)
             .AsEnumerable();
 
             return listings;
-
         }
 
         // GET: api/Listings
@@ -138,21 +141,101 @@ namespace AnimeginationApi.Controllers
         //    return CreatedAtRoute("DefaultApi", new { id = listing.ListingID }, listing);
         //}
 
+        [HttpPut]
+        [AdminRoleFilter]
+        [JwtTokenFilter]
+        [SwaggerOperation("PutListing")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public async Task<IHttpActionResult> PutListing([FromBody] Listing listingInput)
+        {
+            string userId = Request.UserId();
+
+            Listing listing = new Listing {
+                ListTypeID = listingInput.ListTypeID, 
+                Rank = listingInput.Rank, 
+                ProductID = listingInput.ProductID,
+                Effective = listingInput.Effective,
+                Expiration = listingInput.Expiration,
+                Created = DateTime.Now
+            };
+
+            db.Listings.Add(listing);
+            db.SaveChanges();
+
+            var response = new
+            {
+                ListTypeID = listing.ListTypeID, 
+                Rank = listing.Rank, 
+                ProductID = listing.ProductID,
+                Effective = listing.Effective,
+                Expiration = listing.Expiration,
+                Created = listing.Created
+            };
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [AdminRoleFilter]
+        [JwtTokenFilter]
+        [SwaggerOperation("PostListing")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.InternalServerError)]
+        public async Task<IHttpActionResult> PostListing([FromBody] Listing listingInput)
+        {
+            if (!this.ListingExists(listingInput.ListingID)) {
+                return NotFound();
+            }
+            Listing listing = db.Listings.SingleOrDefault(item => 
+                item.ListingID == listingInput.ListingID);
+            if (listing == null) {
+                return NotFound();
+            }
+            listing.ListTypeID = listingInput.ListTypeID;
+            listing.Rank = listingInput.Rank;
+            listing.ProductID = listingInput.ProductID;
+            listing.Effective = listingInput.Effective;
+            listing.Expiration = listingInput.Expiration;
+            db.SaveChanges();
+
+            var response = new {
+                ListingID = listing.ListingID,
+                ListTypeID = listing.ListTypeID,
+                Rank = listing.Rank,
+                ProductID = listing.ProductID,
+                Effective = listing.Effective,
+                Expiration = listing.Expiration
+            };
+            return Ok(response);
+        }
+
         //// DELETE: api/Listings/5
-        //[ResponseType(typeof(Listing))]
-        //public async Task<IHttpActionResult> DeleteListing(int id)
-        //{
-        //    Listing listing = await db.Listings.FindAsync(id);
-        //    if (listing == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpDelete]
+        [AdminRoleFilter]
+        [JwtTokenFilter]
+        [SwaggerOperation("DeleteListing")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        [SwaggerResponse(HttpStatusCode.Unauthorized)]
+        [SwaggerResponse(HttpStatusCode.Forbidden)]
+        public async Task<IHttpActionResult> DeleteListing(int id)
+        {
+            // Delete Media Record
+            Listing listing = db.Listings.SingleOrDefault(item => item.ListingID == id);
 
-        //    db.Listings.Remove(listing);
-        //    await db.SaveChangesAsync();
+            if (listing == null)
+            {
+                return NotFound();
+            }
 
-        //    return Ok(listing);
-        //}
+            db.Listings.Remove(listing);
+            //await db.SaveChangesAsync();
+            db.SaveChanges();
+
+            return Ok(listing);
+        }
 
         protected override void Dispose(bool disposing)
         {
