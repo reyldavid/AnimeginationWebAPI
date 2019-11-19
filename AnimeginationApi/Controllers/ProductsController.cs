@@ -48,7 +48,8 @@ namespace AnimeginationApi.Controllers
 
         // GET: api/Products/5
         // [JwtTokenFilter]
-        [SwaggerOperation("GetProducts")]
+        [Route("api/Products/{id}", Name = "GetProductsById")]
+        [SwaggerOperation("GetProductsById")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
         public object GetProducts(int id)

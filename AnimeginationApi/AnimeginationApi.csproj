@@ -185,6 +185,7 @@
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PublishersController.cs" />
     <Compile Include="Controllers\RatingsController.cs" />
+    <Compile Include="Controllers\RecommendsController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\SimilarsController.cs" />
     <Compile Include="Controllers\StatesController.cs" />
@@ -227,6 +228,7 @@
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\Publisher.cs" />
     <Compile Include="Models\Rating.cs" />
+    <Compile Include="Models\Recommend.cs" />
     <Compile Include="Models\State.cs" />
     <Compile Include="Models\TokenModel.cs" />
     <Compile Include="Models\UserAccount.cs" />

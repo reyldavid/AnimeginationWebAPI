@@ -37,6 +37,7 @@ namespace AnimeginationApi.Models
         //public virtual DbSet<UserProfile> UserProfiles { get; set; }
         public virtual DbSet<UserAccount> UserAccounts { get; set; }
         public virtual DbSet<AspnetUser> AspnetUsers { get; set; }
+        public virtual DbSet<Recommendation> Recommendations { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
