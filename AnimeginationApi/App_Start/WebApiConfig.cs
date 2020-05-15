@@ -48,7 +48,7 @@ namespace AnimeginationApi
                 StringComparison.InvariantCultureIgnoreCase, true,
                 "application/json"));
 
-            //config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling 
+            //config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling
             //    = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
             // Web API configuration and services

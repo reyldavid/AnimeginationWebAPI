@@ -162,7 +162,8 @@ namespace AnimeginationApi.Controllers
                         oi.OrderItemID,
                         oi.ProductID,
                         oi.Quantity,
-                        oi.FinalUnitPrice
+                        oi.FinalUnitPrice,
+                        oi.ItemDate
                     })
                     .Join(
                         db.Products,
@@ -186,10 +187,12 @@ namespace AnimeginationApi.Controllers
                             p.Publisher.PublisherName,
                             p.RatingID,
                             p.UnitPrice,
-                            p.YourPrice
+                            p.YourPrice,
+                            oi.ItemDate
                         })
                         .Where(p => p.UserId == userId &&
                                 p.OrderName.ToLower().Equals(carttype.ToLower()))
+                        .OrderByDescending(oid => oid.ItemDate)
                         .AsEnumerable();
 
             return Ok(items);
@@ -433,6 +436,42 @@ namespace AnimeginationApi.Controllers
             db.SaveChanges();
 
             return Ok(orderItem);
+        }
+
+        // POST: api/CartItems/list
+        [HttpPost]
+        [Route("api/cartitems/list", Name = "GetCartItemsList")]
+        [SwaggerOperation("GetCartItemsList")]
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.NotFound)]
+        public async Task<IHttpActionResult> GetCartItemsList([FromBody] int[] productIds)
+        {
+            var items = db.Products
+            .Where(prod => productIds.Contains(prod.ProductID))
+            .Select(p => new
+            {
+                categoryName = p.Category.CategoryName,
+                finalUnitPrice = p.YourPrice,
+                mediumName = p.Medium.MediumName,
+                orderID = 0,
+                orderItemID = 0,
+                orderName = "visited",
+                orderTypeID = 4,
+                productAgeRating = p.ProductAgeRating,
+                productCode = p.ProductCode,
+                productID = p.ProductID,
+                productLength = p.ProductLength,
+                productTitle = p.ProductTitle,
+                productYearCreated = p.ProductYearCreated,
+                publisherName = p.Publisher.PublisherName,
+                quantity = 1,
+                ratingID = p.RatingID,
+                unitPrice = p.UnitPrice,
+                userId = "",
+                yourPrice = p.YourPrice
+            });
+
+            return Ok(items);
         }
 
         protected override void Dispose(bool disposing)
